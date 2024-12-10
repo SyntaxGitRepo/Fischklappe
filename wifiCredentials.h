@@ -1,2 +1,2 @@
-#define SECRET_SSID "FRITZ!Box 6490 Cable"
-#define SECRET_PASS "Klavier+23.wifi"
+#define SECRET_SSID ""
+#define SECRET_PASS ""
