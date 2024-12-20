@@ -26,27 +26,16 @@ If you have any questions ask me on teams (Elias Wassermann).
 const char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS;
 
+Servo servo;
+
 // The IDs of the fish
-constexpr int fish[5] = {0, 2, 3, 4, 7}; 
+constexpr int fish[5] = {63, 1, 5, 8}; 
 
 // Funny sentences that are printed out randomly on contact with a fish
-constexpr char* sentences[16] = {
+constexpr char* sentences[3] = {
   "Aus Spaß wurde Ernst. Ernst ist heute 3 Jahre alt.",
 	"Ich habe einen Kater. Er heißt Felix und liegt auf dem Sofa.",
-	"Früher war alles besser. Sogar die Zukunft.",
-	"Die Lage ist ernst, aber nicht hoffnungslos. Hoffnungslos ist nur Ernst.",
-	"Mein Arzt hat gesagt, ich solle mehr laufen – jetzt habe ich eine Stunde lang versucht, ihm hinterherzukommen.",
-	"Ich dachte, ich hätte den Dreh raus – jetzt habe ich nur einen kaputten Schraubenzieher.",
-	"Grubi: Ist Mayonaise auch ein Instrument?",
-	"Grubi: Der erste Baum ist eingepflanzt worden!",
-	"Grubi: Mutterland der Industralisierung ist Asien!",
-	"Emil: Wenn ich jetzt Bäume einpflanze, bin ich in 30 Jahren reich!",
-	"Grubi: Ich bin ein Hund!",
-	"Grubi: Die Erde ist eine Schreibe, weil wenn man im Flugzeug sitzt, fliegt das Flugzeug gerade und nicht nach unten!!!!!",
-	"Grubi: Lamine Yamal ist besser wie Ronaldo",
-	"Grubi: Die Welt geht morgen unter haben die Simpsons gesagt",
-	"Ich habe gegend Baron gespielt, aber er war gar kein Baron hahahahhah",
-	"Hohni: Was ist das Gegenteil von einer Polka und auf was fliegt Nils Holgerson in einem Wort: EntenWalzer!"
+	"Früher war alles besser. Sogar die Zukunft."
 };
 
 class RfidNotify
@@ -62,23 +51,27 @@ public:
 
   static void OnPacketRead(const Rfid134Reading& reading)
   {
+    TelnetStream.println(reading.id);
     // the ID of the Fish (rfid-tag). (The last 4 binary digits)
-    int IDOfFish = reading.id & 15; 
+    int IDOfFish = reading.id & 63; 
+    TelnetStream.println(IDOfFish);
 
     // The size of the sentences array
     int sizeOfArray = sizeof(sentences);
 
     // a random number between  0 and the size of the array
     int randIndex = rand() % sizeOfArray;
-    
+
     // print out a different message for every fish 
     switch (IDOfFish) {
       case fish[0]:
         TelnetStream.println("Moin Leute Trymacs hier. Ich bin der Pinke Fisch.");
+        servo.write(180);
         break;
 
       case fish[1]:
         TelnetStream.println("Ich bins Tim. Ich habe einen Kater. Ich bin der Lilane Fisch.");
+        servo.write(180);
         break;
 
       case fish[2]:
@@ -87,15 +80,15 @@ public:
 
       case fish[3]:
         TelnetStream.println("Bäng Bäng Brotato Gäng. Ich bin der Rote Fisch.");
-        break;
-
-      case fish[4]:
-        TelnetStream.println("5. Fisch!");
+        servo.write(180);
         break;
 
       default:
         TelnetStream.println("Ich muss hier raus!!!!");
     }
+
+    delay(1000);
+    servo.write(0);
 
     // print out one random sentence 
     TelnetStream.println(sentences[randIndex]);
@@ -104,8 +97,6 @@ public:
 
 SoftwareSerial secondarySerial(12, 11); // RX, TX
 Rfid134<SoftwareSerial, RfidNotify> rfid(secondarySerial);
-
-Servo servo;
 
 void setup() {
   // Setup Serial
@@ -163,8 +154,6 @@ void setup() {
 }
 
 void loop() {
-  servo.write(0);
-  delay(1000);
-  servo.write(180);
-  delay(1000);
+  ArduinoOTA.handle();
+  rfid.loop();
 }
